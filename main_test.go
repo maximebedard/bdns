@@ -13,25 +13,27 @@ var message = []byte{
 
 	// questions
 	0x08, 0x6D, 0x79, 0x64, 0x6F, 0x6D, 0x61, 0x69, 0x6E, 0x03, 0x63, 0x6F, 0x6D, 0x00, // mydomain.com
-	0x00, 0x00,
-	0x00, 0x00,
+	0x00, 0x01,
+	0x00, 0x01,
+
+	// resource records
 }
 
 func TestParseLabel(t *testing.T) {
 	var input = []byte{0x08, 0x6D, 0x79, 0x64, 0x6F, 0x6D, 0x61, 0x69, 0x6E, 0x03, 0x63, 0x6F, 0x6D, 0x00}
 
-	output, length := parseLabel(input)
-	if output != "mydomain.com" && length != 14 {
-		t.Error("Expected mydomain.com with a length of 14, got %s, %d", output, length)
+	output := parseLabel(input)
+	if output != "mydomain.com" {
+		t.Error("Expected mydomain.com, got %s", output)
 	}
 }
 
 func TestParseLabelComplex(t *testing.T) {
 	var input = []byte{0x03, 0x77, 0x77, 0x77, 0x08, 0x6D, 0x79, 0x64, 0x6F, 0x6D, 0x61, 0x69, 0x6E, 0x03, 0x63, 0x6F, 0x6D, 0x00}
 
-	output, length := parseLabel(input)
-	if output != "www.mydomain.com" && length != 18 {
-		t.Error("Expected www.mydomain.com with a length of 18, got %s, %d", output, length)
+	output := parseLabel(input)
+	if output != "www.mydomain.com" {
+		t.Error("Expected www.mydomain.com, got %s", output)
 	}
 }
 
@@ -74,11 +76,23 @@ func TestNewQuestion(t *testing.T) {
 		t.Error("Expected mydomain.com, got ", questions[0].Qname)
 	}
 
-	if questions[0].Qtype != 0 {
-		t.Error("Expected Qtype == 0, got ", questions[0].Qtype)
+	if questions[0].Qtype != 1 {
+		t.Error("Expected Qtype == 1, got ", questions[0].Qtype)
 	}
 
-	if questions[0].Qclass != 0 {
-		t.Error("Expected.Qclass == 0, got ", questions[0].Qclass)
+	if questions[0].Qclass != 1 {
+		t.Error("Expected Qclass == 1, got ", questions[0].Qclass)
+	}
+}
+
+func TestNewMessage(t *testing.T) {
+	msg := NewMessage(message)
+
+	if msg.Header.Qdcount != 1 {
+		t.Error("Expected Qdcount == 1, got ", msg.Header.Qdcount)
+	}
+
+	if msg.Questions[0].Qname != "mydomain.com" {
+		t.Error("Expected Qname == mydomain.com, got", msg.Questions[0].Qname)
 	}
 }

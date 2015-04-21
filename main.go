@@ -96,16 +96,14 @@ func newHeader(buffer []byte) *Header {
 func newQuestions(buffer []byte, count uint16) []Question {
 	questions := make([]Question, count)
 	offset := 12
-	for _, question := range questions {
-		//question
-		label, length := parseLabel(buffer[offset:])
-		question.Qname = label
-		offset += length - 10
+	for i, _ := range questions {
+		questions[i].Qname = parseLabel(buffer[offset:])
+		offset += len(questions[i].Qname) + 2
 
-		question.Qtype = binary.BigEndian.Uint16(buffer[offset:2])
+		questions[i].Qtype = binary.BigEndian.Uint16(buffer[offset : offset+2])
 		offset += 2
 
-		question.Qclass = binary.BigEndian.Uint16(buffer[offset:2])
+		questions[i].Qclass = binary.BigEndian.Uint16(buffer[offset : offset+2])
 		offset += 2
 	}
 	return questions
@@ -121,7 +119,7 @@ func checkErr(err error) {
 	}
 }
 
-func parseLabel(label []byte) (string, int) {
+func parseLabel(label []byte) string {
 	var buffer bytes.Buffer
 	i, j := 0, 0
 	for ; label[i] != 0x00; i++ {
@@ -135,5 +133,5 @@ func parseLabel(label []byte) (string, int) {
 
 		buffer.WriteString(string(label[i]))
 	}
-	return buffer.String(), i
+	return buffer.String()
 }
